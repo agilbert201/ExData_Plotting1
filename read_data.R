@@ -16,5 +16,17 @@ init <- function() {
     }
 }
 
-#tab5rows <- read.table(dataset.txtfile, header = TRUE, nrows = 5, sep = ";")
-#classes <- sapply(tab5rows, class)
+tab5rows <- read.table(dataset.txtfile, header = TRUE, nrows = 5, sep = ";")
+classes <- sapply(tab5rows, class)
+dataset <- read.table(dataset.txtfile, header = TRUE, nrows = 2500000, sep = ";", colClasses = classes, na.strings = "?")
+require(data.table)
+power.table <- data.table(dataset)
+power.data <- power.table[Date == "1/2/2007" | Date == "2/2/2007",]
+
+# TODO make true datetime for data and time columns
+
+#plot_1
+hist(power.data[,Global_active_power], main = "Global Active Power", xlab = "Global Active Power (kilowatts)", col = "red")
+
+#plot_2 - not right need true datetime for x axis
+plot(power.data[,Time], power.data[,Global_active_power], type = "line")
