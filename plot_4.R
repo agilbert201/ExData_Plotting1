@@ -13,6 +13,7 @@ ApplyDateAxis <- function() {
     axis(1, axis.points, axis.labels)
 }
 
+png(file = "plot_4.png", bg = "transparent")
 par(mfrow = c(2, 2))
 with (power.data, {
     # Graph 1
@@ -38,3 +39,4 @@ with (power.data, {
     plot(DateTime, Global_reactive_power, xlab = "datetime", type = "l", xaxt = "n")
     ApplyDateAxis();
 })
+dev.off()
