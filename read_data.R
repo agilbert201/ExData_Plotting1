@@ -1,9 +1,11 @@
+require(data.table)
+
 dataset.url <- "https://d396qusza40orc.cloudfront.net/exdata%2Fdata%2Fhousehold_power_consumption.zip"
 dataset.zipfile <- file.path("data", "household_power_consumption.zip")
 dataset.txtfile <- file.path("data", "household_power_consumption.txt")
 
-init <- function() {
-    ## Verifiy data dir exists and data set is present
+Setup <- function() {
+    ## Verifiy data dir exists and data set is present.
     
     if (!file.exists("data")) {
         dir.create("data")
@@ -16,17 +18,27 @@ init <- function() {
     }
 }
 
-tab5rows <- read.table(dataset.txtfile, header = TRUE, nrows = 5, sep = ";")
-classes <- sapply(tab5rows, class)
-dataset <- read.table(dataset.txtfile, header = TRUE, nrows = 2500000, sep = ";", colClasses = classes, na.strings = "?")
-require(data.table)
-power.table <- data.table(dataset)
-power.data <- power.table[Date == "1/2/2007" | Date == "2/2/2007",]
-
-# TODO make true datetime for data and time columns
-
-#plot_1
-hist(power.data[,Global_active_power], main = "Global Active Power", xlab = "Global Active Power (kilowatts)", col = "red")
-
-#plot_2 - not right need true datetime for x axis
-plot(power.data[,Time], power.data[,Global_active_power], type = "line")
+GetPowerData <- function () {
+    ## Returns power data for graphing, just the two days 02/01/2007 and 02/02/2007.
+    ## Assume Setup has been run, original data set is available locally in data dir.
+    ## Normalizes Date and Time columns into a single DateTime column of type POSIXct.
+    ##
+    ## Returns:
+    ##  A data.table with power data for the two days
+    ##
+    
+    # First read 5 rows to get col classes, as makes the actual data read faster
+    tab5rows <- read.table(dataset.txtfile, header = TRUE, nrows = 5, sep = ";")
+    classes <- sapply(tab5rows, class)
+    dataset <- read.table(dataset.txtfile, header = TRUE, nrows = 2500000, sep = ";", colClasses = classes, na.strings = "?")
+    power.table <- data.table(dataset)
+    # Constrain to 02/01/2007 and 02/02/2007
+    power.table <- power.table[Date == "1/2/2007" | Date == "2/2/2007",]
+    # Convert date and time cols to datetime
+    dts <- power.table[,paste(as.character(Date), " ", as.character(Time))]
+    datetimes <- lapply(dts, strptime, "%d/%m/%Y %H:%M:%S")
+    datetimes <- sapply(datetimes, as.POSIXct)
+    power.table <- power.table[,DateTime:=datetimes]
+    power.table <- power.table[,Date:=NULL]
+    power.table <- power.table[,Time:=NULL]
+}
