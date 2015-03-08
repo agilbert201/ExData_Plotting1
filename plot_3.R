@@ -6,4 +6,4 @@ source("read_data")
 Setup();
 power.data <- GetPowerData();
 
-plot(power.data[,DateTime], power.data[,Global_active_power], type = "line")
+plot(power.data[,DateTime], power.data[,Sub_metering_1], type = "line")
